@@ -1,0 +1,23 @@
+<!-- templates/api/create_palette.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Color Palette</title>
+</head>
+<body>
+    <h1>Create Color Palette</h1>
+    <form action="http://127.0.0.1:8000/create" method="post">
+        {% csrf_token %}
+        <label for="name">Name:</label>
+        <input type="text" name="name" required><br><br>
+        <label for="dominant_colors">Dominant Colors (comma-separated HEX values):</label>
+        <input type="text" name="dominant_colors" required><br><br>
+        <label for="accent_colors">Accent Colors (comma-separated HEX values):</label>
+        <input type="text" name="accent_colors" required><br><br>
+        <label for="is_public">Public:</label>
+        <input type="checkbox" name="is_public"><br><br>
+        <input type="submit" value="Create">
+    </form>
+</body>
+</html>

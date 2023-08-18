@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Palettes</title>
+</head>
+<body>
+    <h1>Color Palettes</h1>
+    
+    <div id="login-container">
+        <button id="login-button">Login</button>
+    </div>
+
+    <ul id="palettes"></ul>
+
+    <script>
+        const loginContainer = document.getElementById('login-container');
+        const loginButton = document.getElementById('login-button');
+        const palettesList = document.getElementById('palettes');
+
+        // Check if user is authenticated and update UI accordingly
+        fetch('http://127.0.0.1:8000/api-auth/status/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    loginContainer.innerHTML = `<p>Welcome, ${data.username}!</p>`;
+                    loadPalettes();
+                } else {
+                    loginButton.style.display = 'block';
+                    loadPublicPalettes();
+                }
+            });
+
+        // Login button click event
+        loginButton.addEventListener('click', () => {
+            window.location.href = '/admin/login/';
+        });
+
+        function loadPalettes() {
+            fetch('http://127.0.0.1:8000/public/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(palette => {
+                        const li = document.createElement('li');
+                        li.textContent = palette.name;
+
+                        const favoriteButton = document.createElement('button');
+                        favoriteButton.textContent = 'Favorite';
+                        favoriteButton.addEventListener('click', () => saveFavorite(palette.id));
+
+                        li.appendChild(favoriteButton);
+                        palettesList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error fetching palettes:', error));
+        }
+
+        function loadPublicPalettes() {
+            fetch('http://127.0.0.1:8000/public/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(palette => {
+                        if (palette.is_public) {
+                            const li = document.createElement('li');
+                            li.textContent = palette.name;
+                            palettesList.appendChild(li);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching palettes:', error));
+        }
+
+        function saveFavorite(paletteId) {
+            fetch(`http://127.0.0.1:8000/${paletteId}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Palette added to favorites!');
+                } else {
+                    alert('Error adding palette to favorites.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    </script>
+</body>
+</html>
